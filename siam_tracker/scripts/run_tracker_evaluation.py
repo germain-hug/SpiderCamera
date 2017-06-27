@@ -16,7 +16,7 @@ def main():
     # Avoid printing TF debugging information
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-    # Parse arguments from JSON file
+    # --- Parse arguments from JSON file ---
     hp, evaluation, run, env, design = parse_arguments()
     final_score_sz = hp.response_up * (design.score_sz - 1) + 1
     image, templates_z, scores = siam.build_tracking_graph(final_score_sz, design, env)
