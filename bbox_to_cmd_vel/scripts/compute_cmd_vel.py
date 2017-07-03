@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import rospy
+import design as d
+from commands import update_motor_rel
 from geometry_msgs.msg import Point
 from bbox_to_cmd_vel.msg import cmd_vel_motors
 
@@ -21,6 +23,8 @@ def bbox_to_cmd_vel():
 
 def compute_cmd_vel(data):
 
+    print(update_motor_rel(0.0, 0.0, 0.0, (d.m_1, d.m_2, d.m_3, d.m_4)))
+
     # Generate Motors Command
     msg = cmd_vel_motors()
     msg.vel_1 = 0.1
@@ -30,4 +34,5 @@ def compute_cmd_vel(data):
     return msg
 
 if __name__ == '__main__':
+    d.__init__() # Compute initial Motors Positions
     bbox_to_cmd_vel()
