@@ -2,6 +2,7 @@ import json
 import math
 from collections import namedtuple
 
+
 def cart_to_spher(x,y,z):
     r = math.sqrt(x*x+y*y+z*z)
     if(x!=0):
@@ -21,7 +22,7 @@ def compute_motor_coords(x, y, z):
     return [x, y, z, r, t, p]
 
 def __init__():
-    global x, y, z, m_1, m_2, m_3, m_4
+    global m # Motors
     # (m_i) : (x_i, y_i, z_i, rho_i, theta_i, phi_i)
     # (x,y,z) : world coordinates of camera
 
@@ -36,7 +37,8 @@ def __init__():
     z = design.height - design.height_cam
 
     # ----- Motor Coordinates ----
-    m_1 = compute_motor_coords(x, -y, z)
-    m_2 = compute_motor_coords(-x, -y, z)
-    m_3 = compute_motor_coords(-x, y, z)
-    m_4 = compute_motor_coords(x, y, z)
+    m = []
+    m.append(compute_motor_coords(x, -y, z))
+    m.append(compute_motor_coords(-x, -y, z))
+    m.append(compute_motor_coords(-x, y, z))
+    m.append(compute_motor_coords(x, y, z))
