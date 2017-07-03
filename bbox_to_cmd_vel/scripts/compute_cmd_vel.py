@@ -17,7 +17,7 @@ def callback(data, pub):
 
 def bbox_to_cmd_vel():
     rospy.init_node('bbox_to_cmd_vel', anonymous=True)
-    pub = rospy.Publisher('cmv_vel', cmd_vel_motors, queue_size=1)
+    pub = rospy.Publisher('cmd_vel', cmd_vel_motors, queue_size=1)
     rospy.Subscriber('bbox', Point, callback, pub)
     rospy.spin()
 
