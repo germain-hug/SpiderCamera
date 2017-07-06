@@ -170,16 +170,3 @@ def _update_target_position(pos_x, pos_y, score, final_score_sz, tot_stride, sea
     # *position* within frame in frame coordinates
     pos_y, pos_x = pos_y + disp_in_frame[0], pos_x + disp_in_frame[1]
     return pos_x, pos_y
-
-
-# ROS
-
-def talker():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
-    rospy.init_node('talker', anonymous=True)
-    rate = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown():
-        hello_str = "hello world %s" % rospy.get_time()
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
-        rate.sleep()
