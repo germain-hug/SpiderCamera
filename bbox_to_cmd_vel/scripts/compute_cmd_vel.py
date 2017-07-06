@@ -14,7 +14,7 @@ Output 4 velocity commands for the motors
 
 def callback(data, pub):
     msg = move_motor(0.0,0.0,0.0)
-  	pub.publish(msg)
+    pub.publish(msg)
 
 # ---- Initialize ROS Node ----
 def bbox_to_cmd_vel():
@@ -33,7 +33,7 @@ def move_motor(x,y,z):
     msg = cmd_vel_motors()
     msg.vel_1 = delta[0][0]
     msg.vel_2 = delta[1][0]
-    msg.vel_3 = delta[2]][0]
+    msg.vel_3 = delta[2][0]
     msg.vel_4 = delta[3][0]
     return msg
 
