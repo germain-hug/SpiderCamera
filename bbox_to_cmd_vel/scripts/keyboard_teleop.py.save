@@ -10,24 +10,24 @@ import subprocess as sp
 SF = 15 # Speed Factor
 
 splash = """
----------------------------
- Reading from the keyboard
----------------------------
+	---------------------------
+	 Reading from the keyboard
+	---------------------------
 
- Horizontal Translation :
+	 Horizontal Translation :
 	
-       'z'    
-        ▲
-  'q' ◀   ▶ 'd'
-	▼
-       's'    
-
- Vertical Translation :
-
- 'u'/'j' : Up ▲ / Down ▼
-
- Any other key to stop
- CTRL-C to quit
+	        'z'    
+	         ▲
+	   'q' ◀   ▶ 'd'
+ 	       	▼
+	       's'    
+	
+	Vertical Translation :
+	
+	'u'/'j' : Up ▲ / Down ▼
+	
+	Any other key to stop
+	CTRL-C to quit
 """
 
 
