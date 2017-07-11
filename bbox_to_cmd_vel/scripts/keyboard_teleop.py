@@ -7,20 +7,18 @@ from bbox_to_cmd_vel.msg import cmd_vel_motors
 from compute_cmd_vel import move_motor
 import subprocess as sp
 
-SF = 15 # Speed Factor
-
 splash = """
 ---------------------------
  Reading from the keyboard
 ---------------------------
 
  Horizontal Translation :
-	
-       'z'    
+
+       'z'
         ▲
   'q' ◀   ▶ 'd'
 	▼
-       's'    
+        's'
 
  Vertical Translation :
 
@@ -53,7 +51,7 @@ if __name__=="__main__":
 	settings = termios.tcgetattr(sys.stdin)
 	rospy.init_node('keyboard_teleop', anonymous=True)
 	pub = rospy.Publisher('cmd_vel', cmd_vel_motors, queue_size=1)
-	
+
 	curr_vel = (0,0,0)
 	d.__init__()
 
@@ -72,7 +70,7 @@ if __name__=="__main__":
 				if (key == '\x03'):
 					break
 
-			msg = move_motor(SF*curr_vel[0],SF*curr_vel[1],SF*curr_vel[2])
+			msg = move_motor(curr_vel[0], curr_vel[1], curr_vel[2])
 			#print(d.m)
 			pub.publish(msg)
 
@@ -84,4 +82,3 @@ if __name__=="__main__":
 		msg = move_motor(0.0,0.0,0.0)
 		pub.publish(msg)
 		termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
-
