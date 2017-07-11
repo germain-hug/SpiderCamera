@@ -28,7 +28,8 @@ def move_motor(x,y,z):
     # Compute new coordinates (cart. + spher.)
     delta = update_motor_rel(x, y, z, d.m)
     for i in range(0,len(d.m)):
-        d.m[i] = [d.m[i][0] + x, d.m[i][1] + y, d.m[i][2] + z, d.m[i][3] + delta[i][0], d.m[i][4] + delta[i][1], d.m[i][5] + delta[i][2]]
+        d.m[i] = [d.m[i][0] - x, d.m[i][1] - y, d.m[i][2] - z, d.m[i][3] + delta[i][0], d.m[i][4] + delta[i][1], d.m[i][5] + delta[i][2]]
+
     # Generate ROS Message
     msg = cmd_vel_motors()
     msg.vel_1 = delta[0][0]
