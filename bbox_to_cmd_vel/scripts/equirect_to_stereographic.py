@@ -38,8 +38,7 @@ def compute_lambda(x,y,phi_1,lambda_0, R):
 
 def build_map(im):
     h, w, _ = im.shape
-    x = nplib.repmat(range(1,w), h-1, 1).astype('float32')
-    y = np.transpose(nplib.repmat(range(1,h), w-1, 1)).astype('float32')
+    x, y = np.meshgrid(range(-w/2,w/2),range(-w/2,w/2))
 
     R = 1
     phi = compute_phi(x,y,0,R).astype('float32')
@@ -49,8 +48,6 @@ def build_map(im):
 if __name__ == '__main__':
 
     im = cv2.imread('equirect.jpg')
-    cv2.imshow('Equirectangular image', im)
-    cv2.waitKey(0)
 
     phi, lbda = build_map(im)
     print phi, lbda
