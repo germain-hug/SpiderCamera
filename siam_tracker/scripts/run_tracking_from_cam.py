@@ -22,7 +22,7 @@ def main():
     image, templates_z, scores = siam.build_tracking_graph(final_score_sz, design, env)
 
     # --- Start Streaming from Video ---
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture("~/stream.flv")
     ret, frame = cap.read()
     if(not ret):
         print "Error opening video sequence"
