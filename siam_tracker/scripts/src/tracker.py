@@ -24,6 +24,14 @@ from geometry_msgs.msg import Point
 # os.environ['CUDA_VISIBLE_DEVICES'] = '{}'.format(gpu_device)
 
 # read default parameters and override with custom ones
+def streaming_thread():
+    # Restart streaming for online tracking
+    cap.release()
+    cap = cv2.VideoCapture(stream_path)
+    start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT)  # Start at last frame
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
+
+
 def tracker(hp, run, design,
             pos_x, pos_y, target_w, target_h,
             final_score_sz, templates_z, scores,
@@ -69,11 +77,7 @@ def tracker(hp, run, design,
 
         print("Started Tracking")
 
-        # Restart streaming for online tracking
-        cap.release()
-        cap = cv2.VideoCapture(stream_path)
-        start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT)  # Start at last frame
-        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
+        
 
         # ================================================
         while (cap.isOpened()):
