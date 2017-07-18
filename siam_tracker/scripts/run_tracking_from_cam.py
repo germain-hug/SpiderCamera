@@ -33,7 +33,7 @@ def main():
         print "Error opening video sequence"
 
     # --- Initialize projection maps ---
-    e2s = equirect2stereograph(0, -1.5, frame)
+    e2s = equirect2stereograph(0, -2.5, frame)
 
     # --- Save Video (Optional) ---
     if run.save_video:
