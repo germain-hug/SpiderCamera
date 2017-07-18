@@ -10,6 +10,7 @@ from src.tracker import tracker
 from src.parse_arguments import parse_arguments
 from src.region_to_bbox import region_to_bbox
 from src.click_and_crop import click_and_crop  # Bounding Box Selection
+from src.equirect2stereograph import equirect2stereograph
 import rospy
 
 def main():
@@ -21,16 +22,23 @@ def main():
     final_score_sz = hp.response_up * (design.score_sz - 1) + 1
     image, templates_z, scores = siam.build_tracking_graph(final_score_sz, design, env)
 
-    # --- Start Streaming from Video ---
-    cap = cv2.VideoCapture("~/stream.flv")
+    # --- Start Streaming from Live Video ---
+    stream_path = "/home/hugo/stream.flv"
+    cap = cv2.VideoCapture(stream_path)
+    start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT) # Start at last frame
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
+
     ret, frame = cap.read()
     if(not ret):
         print "Error opening video sequence"
 
+    # --- Initialize projection maps ---
+    e2s = equirect2stereograph(0, -1.5, frame)
+
     # --- Save Video (Optional) ---
-    #if run.save_video:
-    #    vid_write = cv2.VideoWriter(env.root_sequences + '/' + sys.argv[1] + '_out.avi',
-    #                                cv2.VideoWriter_fourcc(*'MJPG'), 25, (frame.shape[1], frame.shape[0]), True)
+    if run.save_video:
+        vid_write = cv2.VideoWriter(env.root_sequences + '/stream_out.avi',
+                                    cv2.VideoWriter_fourcc(*'MJPG'), 25, (frame.shape[1], frame.shape[0]), True)
 
     # --- Define Initial Bounding Box ---
     BB = click_and_crop(frame, design.window_name)
@@ -43,6 +51,21 @@ def main():
     cv2.waitKey(0)
 
     while True:
+        ret, frame = cap.read()
+        cv2.waitKey(1)
+
+        if (ret):
+            BB.img = e2s.project(frame)
+            cv2.waitKey(1)
+            start_frame += 1
+
+        else:
+            # Reached end of file, wait for new frames
+            cap.release()
+            cap = cv2.VideoCapture(stream_path)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
+            cv2.waitKey(1)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -53,7 +76,8 @@ def main():
     target_h = int(abs(BB.refPt[1][1] - BB.refPt[0][1]))  # Template Height / 2
 
     # ----- Beging Tracking -----
-    tracker(hp, run, design, pos_x, pos_y, target_w, target_h, final_score_sz, templates_z, scores, cap, vid_write, frame)
+    tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
+            final_score_sz, templates_z, scores, cap, vid_write, frame, stream_path, e2s)
 
     cap.release()
     cv2.destroyAllWindows()
