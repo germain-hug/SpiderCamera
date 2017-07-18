@@ -23,6 +23,7 @@ class equirect2stereograph:
 
     def compute_maps(self, w, h, dist, z_rot):
 
+        print("[INFO]: Computing Projection Maps...")
         # --- Useful constants ---
         xGrid, yGrid = np.meshgrid(range(1, w + 1), range(1, h + 1))
         rads = 2 * math.pi / w

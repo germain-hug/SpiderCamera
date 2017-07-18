@@ -41,22 +41,30 @@ def main():
                                     cv2.VideoWriter_fourcc(*'MJPG'), 25, (frame.shape[1], frame.shape[0]), True)
 
     # --- Define Initial Bounding Box ---
-    BB = click_and_crop(frame, design.window_name)
+    BB = click_and_crop(e2s.project(frame), design.window_name)
 
     cv2.namedWindow(design.window_name)
     cv2.startWindowThread()
     cv2.setMouseCallback(design.window_name, BB.callback)
 
-    cv2.imshow(design.window_name, frame)
-    cv2.waitKey(0)
+    cv2.imshow(design.window_name, e2s.project(frame))
+    cv2.waitKey(1)
 
     while True:
         ret, frame = cap.read()
         cv2.waitKey(1)
 
-        if (ret):
+        if ret:
             BB.img = e2s.project(frame)
+            BB.refresh()
+
+            # Reset to last frame to avoid cumulative lagging
+            cap.release()
+            cap = cv2.VideoCapture(stream_path)
+            start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT) # Start at last frame
+            cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
             cv2.waitKey(1)
+
             start_frame += 1
 
         else:
@@ -68,6 +76,11 @@ def main():
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+        if BB.ready:
+            break
+
+    print("[INFO]: Bounding Box Selection: Done")
 
     # ----- Define Initial Bounding Box Params & Template -----
     pos_x = int((BB.refPt[0][0] + BB.refPt[1][0]) / 2)  # Template Center

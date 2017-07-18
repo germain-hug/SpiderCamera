@@ -63,8 +63,11 @@ def tracker(hp, run, design,
         num_frame = 0
 
         # Initialize ROS Publisher
+        print("[INFO]: Initializing ROS Node...")
         pub = rospy.Publisher('bbox', Point, queue_size=10)
         rospy.init_node('tracker', anonymous=True)
+
+        print("Started Tracking")
 
         # Restart streaming for online tracking
         cap.release()
@@ -77,7 +80,13 @@ def tracker(hp, run, design,
 
             t_start = time.time()
 
+            # Reset to last frame to avoid cumulative lagging
+            cap.release()
+            cap = cv2.VideoCapture(stream_path)
+            start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT) # Start at last frame
+            cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
             ret, frame = cap.read()
+
             if ret:
                 frame = e2s.project(frame)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Native format is BGR

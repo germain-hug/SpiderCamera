@@ -12,6 +12,7 @@ class click_and_crop:
         self.refPt = []
         self.img = img   # First frame of stream
         self.name = name # Window name (for display)
+        self.ready = False # Selection done
 
     def callback(self, event, x, y, flags, params):
 
@@ -24,6 +25,7 @@ class click_and_crop:
             cv2.rectangle(disp, self.refPt[0], self.refPt[1], (0, 255, 0), 2)
             cv2.imshow(self.name, disp)
             cv2.waitKey(1)
+            self.ready = True
 
         elif len(self.refPt) == 1:
             disp = self.img.copy()
