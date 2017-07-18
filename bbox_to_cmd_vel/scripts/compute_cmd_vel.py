@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import rospy
+import json
+from collections import namedtuple
 import design as d
 from commands import update_motor_rel
 from geometry_msgs.msg import Point
@@ -12,15 +14,32 @@ Output 4 velocity commands for the motors
 -----------------------------------------
 """
 
-def callback(data, pub):
-    msg = move_motor(0.0,0.0,0.0)
-    pub.publish(msg)
+bbox_x, bbox_y = 0
+scaling_factor = 0.1
+
+def callback(data, args):
+    global bbox_x, bbox_y
+
+    # Initialize first BB coordinates
+    if bbox_x == 0 and bbox_y ==0:
+        bbox_x, bbox_y = data[0], data[1]
+    else:
+
+        # Compute Displacement according to motion mode
+        if(args[1]=="horizontal_topdown"):
+            msg = move_motor(data[0]-bbox_x, data[1]-bbox_y, 0.0)
+        elif(args[1]=="vertical_side"):
+            msg = move_motor(0.0, 0.0, data[0]-bbox_x)
+
+        # Update Coordinates and publish
+        bbox_x, bbox_y = data[0], data[1]
+        args[0].publish(msg)
 
 # ---- Initialize ROS Node ----
-def bbox_to_cmd_vel():
+def bbox_to_cmd_vel(run):
     rospy.init_node('bbox_to_cmd_vel', anonymous=True)
     pub = rospy.Publisher('cmd_vel', cmd_vel_motors, queue_size=1)
-    rospy.Subscriber('bbox', Point, callback, pub)
+    rospy.Subscriber('bbox', Point, callback, (pub, run))
     rospy.spin()
 
 # ---- Returns Relative Displacements and Updates Global Coordinates ----
@@ -40,4 +59,9 @@ def move_motor(x,y,z):
 
 if __name__ == '__main__':
     d.__init__() # Compute initial Motors Positions
-    bbox_to_cmd_vel()
+
+    with open('/home/hugo/catkin_ws/src/bbox_to_cmd_vel/scripts/run.json') as json_file:
+        run = json.load(json_file)
+    run = namedtuple('design', run.keys())(**run)
+
+    bbox_to_cmd_vel(run)

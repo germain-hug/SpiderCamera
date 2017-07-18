@@ -31,3 +31,11 @@ class click_and_crop:
             cv2.imshow(self.name, disp)
             cv2.waitKey(1)
 
+    def refresh(self):
+        if(len(self.refPt)==0):
+            cv2.imshow(self.name, self.img.copy())
+        elif len(self.refPt) == 2:
+            disp = self.img.copy()
+            cv2.rectangle(disp, self.refPt[0], self.refPt[1], (0, 255, 0), 2)
+            cv2.imshow(self.name, disp)
+            cv2.waitKey(1)
