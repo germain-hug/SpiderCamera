@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import src.siamese as siam
-from src.tracker import tracker
+from src.live_tracker import live_tracker
 from src.parse_arguments import parse_arguments
 from src.region_to_bbox import region_to_bbox
 from src.click_and_crop import click_and_crop  # Bounding Box Selection
@@ -26,7 +26,7 @@ def main():
     stream_path = "/home/hugo/stream.flv"
     cap = cv2.VideoCapture(stream_path)
     start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT) # Start at last frame
-    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 15)
 
     ret, frame = cap.read()
     if(not ret):
@@ -89,7 +89,7 @@ def main():
     target_h = int(abs(BB.refPt[1][1] - BB.refPt[0][1]))  # Template Height / 2
 
     # ----- Beging Tracking -----
-    tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
+    live_tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
             final_score_sz, templates_z, scores, cap, vid_write, frame, stream_path, e2s)
 
     cap.release()

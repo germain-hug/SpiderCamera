@@ -18,7 +18,7 @@ def compute_maps(w, h, dist, z_rot):
 
     # --- Useful constants ---
     xGrid, yGrid = np.meshgrid(range(1,w+1),range(1,h+1))
-    #yGrid = np.add(yGrid, -700)
+    yGrid = np.add(yGrid, 400)
     rads = 2*math.pi/w
     z = w / dist
 
@@ -44,13 +44,14 @@ def compute_maps(w, h, dist, z_rot):
 
 if __name__ == '__main__':
 
-    im = cv2.imread('equirect.jpg')
+    im = cv2.imread('equirect_stream.png')
     h, w, _ = im.shape
     print("Computing projection maps...")
-    x_map, y_map = compute_maps(w, h, -3.5, np.deg2rad(90))
+    x_map, y_map = compute_maps(w, h, 2.0, np.deg2rad(90))
     im2 = cv2.remap(im, x_map, y_map, cv2.INTER_CUBIC)
     cv2.imshow('Equirectangular image', im2)
     cv2.waitKey(0)
+
     cv2.destroyAllWindows()
 
     #for i in range(-500,500):
