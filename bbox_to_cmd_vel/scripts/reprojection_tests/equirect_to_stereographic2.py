@@ -18,7 +18,7 @@ def compute_maps(w, h, dist, z_rot):
 
     # --- Useful constants ---
     xGrid, yGrid = np.meshgrid(range(1,w+1),range(1,h+1))
-    yGrid = np.add(yGrid, -400)
+    #yGrid = np.add(yGrid, -700)
     rads = 2*math.pi/w
     z = w / dist
 
@@ -37,7 +37,7 @@ def compute_maps(w, h, dist, z_rot):
     lon = np.mod(lon + math.pi + z_rot,math.pi*2.0) - math.pi
 
     # --- Compute Sampling maps ---
-    x_map = w/2.0 + lon/rads
+    x_map = w/2.0 + lon/rads 
     y_map = h/2.0 - lat/rads
     return x_map.astype('float32'), y_map.astype('float32')
 
@@ -47,10 +47,12 @@ if __name__ == '__main__':
     im = cv2.imread('equirect.jpg')
     h, w, _ = im.shape
     print("Computing projection maps...")
-    x_map, y_map = compute_maps(w, h, -1.5, np.deg2rad(90))
+    x_map, y_map = compute_maps(w, h, -3.5, np.deg2rad(90))
     im2 = cv2.remap(im, x_map, y_map, cv2.INTER_CUBIC)
     cv2.imshow('Equirectangular image', im2)
-    cv2.waitKey(1000)
+    cv2.waitKey(0)
+
+
     #for i in range(-500,500):
     #    im2 = cv2.remap(np.roll(im,i,1), x_map, y_map, cv2.INTER_CUBIC)
     #    cv2.imshow('Equirectangular image', im2)
