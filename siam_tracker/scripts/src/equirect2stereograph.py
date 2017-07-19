@@ -21,9 +21,9 @@ class equirect2stereograph:
         h, w, _ = im.shape # Compute Projection maps
         self.x_map, self.y_map = self.compute_maps(w, h, dist, lon)
 
-    def compute_maps(self, w, h, dist, z_rot):
+    def compute_maps(self, w, h, dist):
 
-        # --- Check if maps have already been computed --- 
+        # --- Check if maps have already been computed ---
         if(os.path.isfile('x_map.dat') & os.path.isfile('y_map.dat')):
             print("[INFO]: Projection Maps found : Loading...")
             x_map = np.fromfile('x_map.dat', dtype=float).reshape(h,w)
@@ -31,27 +31,40 @@ class equirect2stereograph:
 
         else:
             print("[INFO]: Computing Projection Maps...")
-            xGrid, yGrid = np.meshgrid(range(1, w + 1), range(1, h + 1))
-            rads = 2 * math.pi / w
-            z = w / dist
 
-            # --- Define operators as lambda functions ---
-            d = lambda x, y: x - y / 2.0
-            a = lambda x, y: math.atan2(d(y, h), d(x, w))
-            rho = lambda x, y: np.sqrt(d(x, w) ** 2 + d(y, h) ** 2)
-            c = lambda x, y: 2 * math.atan(rho(x, y) / z)
+            x_map = numpy.zeros(shape=(h,w,360))
+            y_map = numpy.zeros(shape=(h,w,360))
 
-            # --- Cartesian to Polar coordinates ---
-            lat = np.asarray(map(c, xGrid.flatten(), yGrid.flatten())).reshape(xGrid.shape)
-            lon = np.asarray(map(a, xGrid.flatten(), yGrid.flatten())).reshape(xGrid.shape) - math.pi / 4.0
+            for phi_1 in range(0,360): # All latitude offsets
 
-            # --- Ensure correct coordinate wrapping ---
-            lat = np.mod(lat + math.pi, math.pi) - math.pi / 2.0
-            lon = np.mod(lon + math.pi + z_rot, math.pi * 2.0) - math.pi
+                xGrid, yGrid = np.meshgrid(range(1,w+1),range(1,h+1))
+                rads = 2*math.pi/w
+                z = w / dist
 
-            # --- Compute Sampling maps ---
-            x_map = w / 2.0 + lon / rads
-            y_map = h / 2.0 - lat / rads
+                # --- Convert to radians ---
+                phi_1 = phi_1*rads
+                s_p = math.sin(phi_1)
+                c_p = math.cos(phi_1)
+
+                # --- Define operators as lambda functions ---
+                d = lambda x,y: x-y/2.0
+                a = lambda x,y: math.atan2(d(y,h),d(x,w))
+                rho = lambda x,y: np.sqrt(d(x,w)**2+d(y,h)**2)
+
+                c = lambda x,y: 2*math.atan(rho(x,y)/z)
+                s_c = lambda x,y: math.sin(c(x,y))
+                c_c = lambda x,y: math.cos(c(x,y))
+
+                longitude = lambda x,y: math.atan2(d(x,w)*s_c(x,y),rho(x,y)*c_p*c_c(x,y)- d(y,h)*s_p*s_c(x,y))
+                latitude = lambda x,y: math.asin(c_c(x,y)*s_p + d(y,h)*s_c(x,y)*c_p/(rho(x,y)+0.00000001))
+
+                # --- Cartesian to Polar coordinates ---
+                lat = np.asarray(map(latitude, xGrid.flatten(), yGrid.flatten())).reshape(xGrid.shape)
+                lon = np.asarray(map(longitude, xGrid.flatten(), yGrid.flatten())).reshape(xGrid.shape)
+
+                # --- Compute Sampling maps ---
+                x_map[:,:,phi_1] = w/2.0 + lon/rads
+                y_map[:,:,phi_1] = h/2.0 - lat/rads
 
             # --- Save maps ----
             x_map.tofile('x_map.dat')

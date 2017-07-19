@@ -48,6 +48,7 @@ def compute_maps(w, h, dist, lambda_0, phi_1):
     # --- Compute Sampling maps ---
     x_map = w/2.0 + lon/rads
     y_map = h/2.0 - lat/rads
+
     return x_map.astype('float32'), y_map.astype('float32')
 
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     im = cv2.imread('equirect.jpg')
     h, w, _ = im.shape
     print("Computing projection maps...")
-    x_map, y_map = compute_maps(w, h, -1.5, 0, 180)
+    x_map, y_map = compute_maps(w, h, -1.5, 0, 270)
     im2 = cv2.remap(im, x_map, y_map, cv2.INTER_CUBIC)
     cv2.imshow('Equirectangular image', im2)
     cv2.waitKey(0)
