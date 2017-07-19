@@ -22,12 +22,7 @@ def callback(data, args):
     global bbox_x, bbox_y
     # Initialize first BB coordinates
     if bbox_x == 0 and bbox_y ==0:
-<<<<<<< HEAD
-        bbox_x, bbox_y = data[0], data[1]
-
-=======
         bbox_x, bbox_y = data.x, data.y
->>>>>>> 65708bff52f0bb1cf09cc433ad5fa582edb5781d
     else:
         # Compute Displacement according to motion mode
     	msg = None

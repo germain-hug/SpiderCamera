@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import src.siamese as siam
+import subprocess as sp
 from src.live_tracker import live_tracker
 from src.parse_arguments import parse_arguments
 from src.region_to_bbox import region_to_bbox
@@ -15,6 +16,7 @@ import rospy
 
 def main():
     # Avoid printing TF debugging information
+    sp.call('clear',shell=True)
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
     # --- Parse arguments from JSON file ---
@@ -32,33 +34,35 @@ def main():
     if(not ret):
         print "Error opening video sequence"
 
-    # --- Initialize projection maps ---
-    e2s = equirect2stereograph(0, -2.5, frame)
-
     # --- Save Video (Optional) ---
     if run.save_video:
         vid_write = cv2.VideoWriter(env.root_sequences + '/stream_out.avi',
                                     cv2.VideoWriter_fourcc(*'MJPG'), 25, (frame.shape[1], frame.shape[0]), True)
 
-    # --- Define Initial Bounding Box ---
-    BB = click_and_crop(e2s.project(frame), design.window_name)
+    # --- Initialize projection maps ---
+    e2s = equirect2stereograph(-2.5, frame, 0, 0)
 
+    # ===================================
+    # --- Define Initial Bounding Box ---
+    # ===================================
+
+    BB = click_and_crop(e2s.project(frame), design.window_name)
     cv2.namedWindow(design.window_name)
     cv2.startWindowThread()
     cv2.setMouseCallback(design.window_name, BB.callback)
-
     cv2.imshow(design.window_name, e2s.project(frame))
     cv2.waitKey(1)
+
 
     while True:
         ret, frame = cap.read()
         cv2.waitKey(1)
 
         if ret:
+            # --- Equirectangular to Stereographic Projection ---
             BB.img = e2s.project(frame)
             BB.refresh()
-
-            # Reset to last frame to avoid cumulative lagging
+            # --- Reset to last frame to avoid cumulative lagging ---
             cap.release()
             cap = cv2.VideoCapture(stream_path)
             start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT) # Start at last frame
@@ -74,9 +78,20 @@ def main():
             cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
             cv2.waitKey(1)
 
+
+        # ---- Rotate Camera Viewpoint ---
+        if cv2.waitKey(1) & 0xFF == ord('e'):
+            e2s.set_lat(e2s.lat + 1)
+        if cv2.waitKey(1) & 0xFF == ord('d'):
+            e2s.set_lat(e2s.lat - 1)
+        if cv2.waitKey(1) & 0xFF == ord('s'):
+            e2s.set_roll(e2s.roll + 1)
+        if cv2.waitKey(1) & 0xFF == ord('f'):
+            e2s.set_roll(e2s.roll - 1)
+
+        # ---- Selection is done ----
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
         if BB.ready:
             break
 
@@ -88,7 +103,13 @@ def main():
     target_w = int(abs(BB.refPt[1][0] - BB.refPt[0][0]))  # Template Width / 2
     target_h = int(abs(BB.refPt[1][1] - BB.refPt[0][1]))  # Template Height / 2
 
+
+
+    # ===========================
     # ----- Beging Tracking -----
+    # ===========================
+
+
     live_tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
             final_score_sz, templates_z, scores, cap, vid_write, frame, stream_path, e2s)
 
