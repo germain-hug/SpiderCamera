@@ -23,8 +23,8 @@ def callback(data, args):
     # Initialize first BB coordinates
     if bbox_x == 0 and bbox_y ==0:
         bbox_x, bbox_y = data[0], data[1]
-    else:
 
+    else:
         # Compute Displacement according to motion mode
         if(args[1]=="horizontal_topdown"):
             msg = move_motor(data[0]-bbox_x, data[1]-bbox_y, 0.0)

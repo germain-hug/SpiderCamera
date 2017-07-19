@@ -39,11 +39,13 @@ def compute_lambda(x,y,phi_1,lambda_0, R):
 def build_map(im):
     h, w, _ = im.shape
     x, y = np.meshgrid(range(-w/2,w/2),range(-w/2,w/2))
+    rads = 2*math.pi/w
 
     R = 1
     phi = compute_phi(x,y,0,R).astype('float32')
     lbda = compute_lambda(x,y,0,0,R).astype('float32')
-    return phi, lbda
+    print phi, lbda
+    return phi/rads, lbda/rads
 
 if __name__ == '__main__':
 
