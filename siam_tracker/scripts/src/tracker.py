@@ -2,6 +2,7 @@ import tensorflow as tf
 
 print('Using Tensorflow ' + tf.__version__)
 import matplotlib.pyplot as plt
+
 import sys
 # sys.path.append('../')
 import os
@@ -15,19 +16,20 @@ import time
 import src.siamese as siam
 from src.visualization import show_frame, show_crops, show_scores
 
-# ROS Libraries
+# ===== ROS ====
 import rospy
 from geometry_msgs.msg import Point
+
+# ===== Streaming ====
+from threading import Thread
+from Queue import Queue
 
 
 # gpu_device = 2
 # os.environ['CUDA_VISIBLE_DEVICES'] = '{}'.format(gpu_device)
 
-# read default parameters and override with custom ones
-def tracker(hp, run, design,
-            pos_x, pos_y, target_w, target_h,
-            final_score_sz, templates_z, scores,
-            cap, vid_write, start_frame, stream_path, e2s):
+def tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
+            final_score_sz, templates_z, scores, cap, vid_write, start_frame):
 
     scale_factors = hp.scale_step ** np.linspace(-np.ceil(hp.scale_num / 2), np.ceil(hp.scale_num / 2), hp.scale_num)
     # cosine window to penalize large displacements
@@ -63,31 +65,21 @@ def tracker(hp, run, design,
         num_frame = 0
 
         # Initialize ROS Publisher
+        print("[INFO]: Initializing ROS Node...")
         pub = rospy.Publisher('bbox', Point, queue_size=10)
         rospy.init_node('tracker', anonymous=True)
-
-        # Restart streaming for online tracking
-        cap.release()
-        cap = cv2.VideoCapture(stream_path)
-        start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT)  # Start at last frame
-        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
 
         # ================================================
         while (cap.isOpened()):
 
             t_start = time.time()
-
             ret, frame = cap.read()
-            if ret:
-                frame = e2s.project(frame)
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Native format is BGR
-                num_frame += 1
-                start_frame += 1
+
+            if not ret:
+                break
             else:
-                cap.release()
-                cap = cv2.VideoCapture(stream_path)
-                cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
-                cv2.waitKey(1)
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                num_frame += 1
 
             # --- Rescale Exemplar and Search Window ---
             scaled_exemplar = z_sz * scale_factors  # Exemplars x3 (scaled)

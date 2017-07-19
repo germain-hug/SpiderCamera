@@ -14,26 +14,33 @@ Output 4 velocity commands for the motors
 -----------------------------------------
 """
 
-bbox_x, bbox_y = 0
+bbox_x = 0
+bbox_y = 0
 scaling_factor = 0.1
 
 def callback(data, args):
     global bbox_x, bbox_y
-
     # Initialize first BB coordinates
     if bbox_x == 0 and bbox_y ==0:
+<<<<<<< HEAD
         bbox_x, bbox_y = data[0], data[1]
 
+=======
+        bbox_x, bbox_y = data.x, data.y
+>>>>>>> 65708bff52f0bb1cf09cc433ad5fa582edb5781d
     else:
         # Compute Displacement according to motion mode
-        if(args[1]=="horizontal_topdown"):
-            msg = move_motor(data[0]-bbox_x, data[1]-bbox_y, 0.0)
-        elif(args[1]=="vertical_side"):
-            msg = move_motor(0.0, 0.0, data[0]-bbox_x)
+    	msg = None
+    	if(args[1].mode=='horizontal_topdown'):
+            print("delta x:", data.x-bbox_x, "delta y:", data.y-bbox_y)
+            msg = move_motor(data.x-bbox_x, data.y-bbox_y, 0.0)
+        elif(args[1].mode=='vertical_side'):
+            msg = move_motor(0.0, 0.0, data.x-bbox_x)
 
         # Update Coordinates and publish
-        bbox_x, bbox_y = data[0], data[1]
-        args[0].publish(msg)
+        bbox_x, bbox_y = data.x, data.y
+        if(msg is not None):
+    		args[0].publish(msg)
 
 # ---- Initialize ROS Node ----
 def bbox_to_cmd_vel(run):
