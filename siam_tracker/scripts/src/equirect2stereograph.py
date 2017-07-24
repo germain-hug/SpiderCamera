@@ -26,7 +26,8 @@ class equirect2stereograph:
     def compute_maps(self, w, h, dist):
 
         # --- Check if maps have already been computed ---
-        if(os.path.isfile('x_map.dat') & os.path.isfile('y_map.dat')):
+        save_path = '/home/hugogermain/catkin_ws/src/siam_tracker/scripts/'
+        if(os.path.isfile(save_path + 'x_map.dat') & os.path.isfile(save_path + 'y_map.dat')):
             print("[INFO]: Projection Maps found : Loading...")
             x_map = np.fromfile('x_map.dat', dtype=float).reshape(h,w)
             y_map = np.fromfile('y_map.dat', dtype=float).reshape(h,w)
@@ -73,8 +74,8 @@ class equirect2stereograph:
                 idx += 1
 
             # --- Save maps ----
-            x_map.tofile('x_map.dat')
-            y_map.tofile('y_map.dat')
+            x_map.tofile(save_path + 'x_map.dat')
+            y_map.tofile(save_path + 'y_map.dat')
 
 
         return x_map.astype('float32'), y_map.astype('float32')

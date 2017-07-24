@@ -27,7 +27,7 @@ def __init__():
     # (x,y,z) : world coordinates of camera
 
     # ---- Parse from JSON file ----
-    with open('/home/hugo/catkin_ws/src/bbox_to_cmd_vel/scripts/design.json') as json_file:
+    with open('/home/hugogermain/catkin_ws/src/bbox_to_cmd_vel/scripts/design.json') as json_file:
         design = json.load(json_file)
     design = namedtuple('design', design.keys())(**design)
 

@@ -14,9 +14,9 @@ splash = """
 
  Horizontal Translation :
 
-       'z'
+       'w'
         ▲
-  'q' ◀   ▶ 'd'
+  'a' ◀   ▶ 'd'
 	▼
         's'
 
@@ -30,9 +30,9 @@ splash = """
 
 
 moveBindings = {
-		'z':(1.0,0.0,0.0), # Forward
+		'w':(1.0,0.0,0.0), # Forward
 		's':(-1.0,0.0,0.0),# Backward
-		'q':(0.0,1.0,0.0), # Left
+		'a':(0.0,1.0,0.0), # Left
 		'd':(0.0,-1.0,0.0),# Right
 		'u':(0.0,0.0,1.0), # Up
 		'j':(0.0,0.0,-1.0),# Down

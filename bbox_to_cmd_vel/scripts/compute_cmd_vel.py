@@ -62,7 +62,7 @@ def move_motor(x,y,z):
 if __name__ == '__main__':
     d.__init__() # Compute initial Motors Positions
 
-    with open('/home/hugo/catkin_ws/src/bbox_to_cmd_vel/scripts/run.json') as json_file:
+    with open('/home/hugogermain/catkin_ws/src/bbox_to_cmd_vel/scripts/run.json') as json_file:
         run = json.load(json_file)
     run = namedtuple('design', run.keys())(**run)
 

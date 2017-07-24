@@ -5,8 +5,11 @@ import os
 import cv2
 import numpy as np
 from PIL import Image
-import src.siamese as siam
+
 import subprocess as sp
+sp.call('clear',shell=True)
+
+import src.siamese as siam
 from src.live_tracker import live_tracker
 from src.parse_arguments import parse_arguments
 from src.region_to_bbox import region_to_bbox
@@ -16,7 +19,6 @@ import rospy
 
 def main():
     # Avoid printing TF debugging information
-    sp.call('clear',shell=True)
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
     # --- Parse arguments from JSON file ---
@@ -25,7 +27,7 @@ def main():
     image, templates_z, scores = siam.build_tracking_graph(final_score_sz, design, env)
 
     # --- Start Streaming from Live Video ---
-    stream_path = "/home/hugo/stream.flv"
+    stream_path = "/home/hugogermain/stream.flv"
     cap = cv2.VideoCapture(stream_path)
     start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT) # Start at last frame
     cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 15)
