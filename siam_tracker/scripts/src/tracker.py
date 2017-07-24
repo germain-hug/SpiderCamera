@@ -25,8 +25,8 @@ from threading import Thread
 from Queue import Queue
 
 
-# gpu_device = 2
-# os.environ['CUDA_VISIBLE_DEVICES'] = '{}'.format(gpu_device)
+gpu_device = 0
+os.environ['CUDA_VISIBLE_DEVICES'] = '{}'.format(gpu_device)
 
 def tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
             final_score_sz, templates_z, scores, cap, vid_write, start_frame):

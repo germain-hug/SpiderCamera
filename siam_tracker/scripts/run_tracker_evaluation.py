@@ -14,7 +14,7 @@ import rospy
 
 def main():
     # Avoid printing TF debugging information
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
     # --- Parse arguments from JSON file ---
     hp, evaluation, run, env, design = parse_arguments()

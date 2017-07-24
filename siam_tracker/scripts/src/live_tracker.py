@@ -25,8 +25,8 @@ from threading import Thread
 from Queue import Queue
 
 
-# gpu_device = 2
-# os.environ['CUDA_VISIBLE_DEVICES'] = '{}'.format(gpu_device)
+gpu_device = 0
+os.environ['CUDA_VISIBLE_DEVICES'] = '{}'.format(gpu_device)
 
 # read default parameters and override with custom ones
 def streaming_thread(threadname, q, cap, e2s, stream_path):
