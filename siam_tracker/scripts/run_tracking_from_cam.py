@@ -38,9 +38,8 @@ def main():
         print "Error opening video sequence"
 
     # --- Save Video (Optional) ---
-    if run.save_video:
-        vid_write = cv2.VideoWriter(env.root_sequences + '/stream_out.avi',
-                                    cv2.VideoWriter_fourcc(*'MJPG'), 25, (frame.shape[1], frame.shape[0]), True)
+    vid_write = cv2.VideoWriter(env.root_sequences + '/stream_out.avi',
+        cv2.VideoWriter_fourcc(*'MJPG'), 25, (frame.shape[1], frame.shape[0]), True)
 
     # --- Initialize projection maps ---
     e2s = equirect2stereograph(-2.5, frame, 0, 0)
@@ -83,18 +82,18 @@ def main():
 
 
         # ---- Rotate Camera Viewpoint ---
-        if cv2.waitKey(1) & 0xFF == ord('e'):
-            e2s.set_lat(e2s.lat + 1)
-            print("+1")
-        if cv2.waitKey(1) & 0xFF == ord('d'):
-            e2s.set_lat(e2s.lat - 1)
-        if cv2.waitKey(1) & 0xFF == ord('s'):
-            e2s.set_roll(e2s.roll + 1)
-        if cv2.waitKey(1) & 0xFF == ord('f'):
-            e2s.set_roll(e2s.roll - 1)
+        k = cv2.waitKey(33)
+        if k==119: # w
+            e2s.set_lat(e2s.lat + 10)
+        if k==115: # s
+            e2s.set_lat(e2s.lat - 10)
+        if k==100: # d
+            e2s.set_roll(e2s.roll + 10)
+        if k==97: # a 
+            e2s.set_roll(e2s.roll - 10)
 
         # ---- Selection is done ----
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if k==113: # q
             break
         if BB.ready:
             break
