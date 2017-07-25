@@ -26,11 +26,11 @@ class equirect2stereograph:
     def compute_maps(self, w, h, dist):
 
         # --- Check if maps have already been computed ---
-        save_path = '/home/hugogermain/catkin_ws/src/siam_tracker/scripts/'
+        save_path = '/home/hugogermain/catkin_ws/'
         if(os.path.isfile(save_path + 'x_map.dat') & os.path.isfile(save_path + 'y_map.dat')):
             print("[INFO]: Projection Maps found : Loading...")
-            x_map = np.fromfile('x_map.dat', dtype=float).reshape(h,w)
-            y_map = np.fromfile('y_map.dat', dtype=float).reshape(h,w)
+            x_map = np.fromfile(save_path + 'x_map.dat', dtype=float).reshape(h,w,360)
+            y_map = np.fromfile(save_path + 'y_map.dat', dtype=float).reshape(h,w,360)
 
         else:
             print("[INFO]: Computing Projection Maps...")
@@ -39,27 +39,28 @@ class equirect2stereograph:
             y_map = np.zeros(shape=(h,w,360))
             idx = 0
 
+            xGrid, yGrid = np.meshgrid(range(1,w+1),range(1,h+1))
+            rads = 2*math.pi/w
+            z = w / dist
+            
+            # --- Define operators as lambda functions ---
+            d = lambda x,y: x-y/2.0
+            a = lambda x,y: math.atan2(d(y,h),d(x,w))
+            rho = lambda x,y: np.sqrt(d(x,w)**2+d(y,h)**2)
+
+            c = lambda x,y: 2*math.atan(rho(x,y)/z)
+            s_c = lambda x,y: math.sin(c(x,y))
+            c_c = lambda x,y: math.cos(c(x,y))
+
+
             for phi_1 in range(0,360): # All latitude offsets
 
                 print(str(phi_1)+"/360...")
-                
-                xGrid, yGrid = np.meshgrid(range(1,w+1),range(1,h+1))
-                rads = 2*math.pi/w
-                z = w / dist
-
+ 
                 # --- Convert to radians ---
                 phi_1 = phi_1*rads
                 s_p = math.sin(phi_1)
                 c_p = math.cos(phi_1)
-
-                # --- Define operators as lambda functions ---
-                d = lambda x,y: x-y/2.0
-                a = lambda x,y: math.atan2(d(y,h),d(x,w))
-                rho = lambda x,y: np.sqrt(d(x,w)**2+d(y,h)**2)
-
-                c = lambda x,y: 2*math.atan(rho(x,y)/z)
-                s_c = lambda x,y: math.sin(c(x,y))
-                c_c = lambda x,y: math.cos(c(x,y))
 
                 longitude = lambda x,y: math.atan2(d(x,w)*s_c(x,y),rho(x,y)*c_p*c_c(x,y)- d(y,h)*s_p*s_c(x,y))
                 latitude = lambda x,y: math.asin(c_c(x,y)*s_p + d(y,h)*s_c(x,y)*c_p/(rho(x,y)+0.00000001))
@@ -84,7 +85,8 @@ class equirect2stereograph:
         self.lat = np.mod(lat, 360)
 
     def set_roll(self, roll):
+        self.im = np.roll(self.im, roll, 1)
         self.roll = roll
 
     def project(self, im):
-        return cv2.remap(np.roll(im,self.roll,1), self.x_map[:,:,self.lat], self.y_map[:,:,self.lat], cv2.INTER_CUBIC)
+        return cv2.remap(im, self.x_map[:,:,self.lat], self.y_map[:,:,self.lat], cv2.INTER_CUBIC)

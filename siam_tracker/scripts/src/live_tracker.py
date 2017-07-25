@@ -34,7 +34,7 @@ def streaming_thread(threadname, q, cap, e2s, stream_path):
     cap.release()
     cap = cv2.VideoCapture(stream_path)
     start_stream_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT)  # Start at last frame
-    cap.set(cv2.CAP_PROP_POS_FRAMES, start_stream_frame - 10)
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_stream_frame - 13)
 
     while (cap.isOpened()):
         ret, frame = cap.read()
@@ -46,7 +46,7 @@ def streaming_thread(threadname, q, cap, e2s, stream_path):
             cap.release()
             cap = cv2.VideoCapture(stream_path)
             start_stream_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT) # Start at last frame
-            cap.set(cv2.CAP_PROP_POS_FRAMES, start_stream_frame - 10)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, start_stream_frame - 13)
             #cv2.waitKey(1)
 
             start_stream_frame += 1
@@ -55,7 +55,7 @@ def streaming_thread(threadname, q, cap, e2s, stream_path):
             # Reached end of file, wait for new frames
             cap.release()
             cap = cv2.VideoCapture(stream_path)
-            cap.set(cv2.CAP_PROP_POS_FRAMES, start_stream_frame - 10)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, start_stream_frame - 13)
             #cv2.waitKey(1)
 
 
@@ -110,14 +110,10 @@ def live_tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
         stream.start()
         #stream.join()
         time.sleep(0.2)
-
         # ================================================
         while (True):
 
             t_start = time.time()
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
 
             # Reset to last frame to avoid cumulative lagging
             #cap.release()

@@ -3,6 +3,7 @@ from __future__ import division
 import sys
 import os
 import cv2
+import time
 import numpy as np
 from PIL import Image
 
@@ -84,6 +85,7 @@ def main():
         # ---- Rotate Camera Viewpoint ---
         if cv2.waitKey(1) & 0xFF == ord('e'):
             e2s.set_lat(e2s.lat + 1)
+            print("+1")
         if cv2.waitKey(1) & 0xFF == ord('d'):
             e2s.set_lat(e2s.lat - 1)
         if cv2.waitKey(1) & 0xFF == ord('s'):
