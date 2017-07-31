@@ -42,7 +42,7 @@ moveBindings = {
 		'j':(0.0,0.0,-1.0),# Down
 		}
 
-
+FACTOR = 10.0
 DAMP_DURATION = 1.0 # in seconds
 
 # ===================================
@@ -114,7 +114,7 @@ if __name__=="__main__":
 
 			# ---- Speed interpolation ---
 			if start:
-				msg = move_motor(new_vel[0], new_vel[1], new_vel[2], t_linerp, old_delta)
+				msg = move_motor(FACTOR*new_vel[0], FACTOR*new_vel[1], FACTOR*new_vel[2], t_linerp, old_delta)
 				pub.publish(msg)
 
 	except:
