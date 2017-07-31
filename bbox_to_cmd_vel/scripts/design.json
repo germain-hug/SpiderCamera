@@ -1,6 +1,6 @@
 {
-  "width":200,
-  "depth":200,
-  "height":100,
-  "height_cam":60
+  "width":15000,
+  "depth":20000,
+  "height":10000,
+  "height_cam":5000
 }

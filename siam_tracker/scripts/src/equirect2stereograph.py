@@ -82,10 +82,11 @@ class equirect2stereograph:
         return x_map.astype('float32'), y_map.astype('float32')
 
     def set_lat(self, lat):
-        self.lat = np.mod(lat, 360)
+        print(lat)
+        self.lat = lat#np.mod(lat, 360)
 
     def set_roll(self, roll):
         self.roll = roll
 
     def project(self, im):
-        return cv2.remap(np.roll(im, self.roll, 1), self.x_map[:,:,self.lat], self.y_map[:,:,self.lat], cv2.INTER_CUBIC)
+        return cv2.remap(np.roll(cv2.flip(im,0), self.roll, 1), self.x_map[:,:,self.lat], self.y_map[:,:,self.lat], cv2.INTER_CUBIC)

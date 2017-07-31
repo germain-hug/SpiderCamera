@@ -26,14 +26,24 @@ def callback(data, args):
     else:
         # Compute Displacement according to motion mode
     	msg = None
+
+        # ---- Horizontal (planar) Motion / Topdown view ----
     	if(args[1].mode=='horizontal_topdown'):
-            print("delta x:", data.x-bbox_x, "delta y:", data.y-bbox_y)
-            msg = move_motor(data.x-bbox_x, data.y-bbox_y, 0.0)
+            if(abs((data.y-bbox_y)/100) > 0.3 or abs((data.x-bbox_x)/100) > 0.3):
+                msg = move_motor((data.y-bbox_y)/10, (data.x-bbox_x)/10, 0.0)
+            else:
+                msg = move_motor(0.0, 0.0, 0.0)
+                
+        # ---- Vertical Motion / Side View ----
         elif(args[1].mode=='vertical_side'):
-            msg = move_motor(0.0, 0.0, data.x-bbox_x)
+            if(abs((data.y-bbox_y)/100) > 0.4):
+                msg = move_motor(0.0, 0.0, -(data.y-bbox_y)/10)
+            else:
+                msg = move_motor(0.0, 0.0, 0.0)
+
 
         # Update Coordinates and publish
-        bbox_x, bbox_y = data.x, data.y
+        #bbox_x, bbox_y = data.x, data.y
         if(msg is not None):
     		args[0].publish(msg)
 
@@ -45,18 +55,19 @@ def bbox_to_cmd_vel(run):
     rospy.spin()
 
 # ---- Returns Relative Displacements and Updates Global Coordinates ----
-def move_motor(x,y,z):
+def move_motor(x,y,z,f=1.0,old_delta=(0.0,0.0,0.0,0.0)):
     # Compute new coordinates (cart. + spher.)
     delta = update_motor_rel(x, y, z, d.m)
     for i in range(0,len(d.m)):
-        d.m[i] = [d.m[i][0] - x, d.m[i][1] - y, d.m[i][2] - z, d.m[i][3] + delta[i][0], d.m[i][4] + delta[i][1], d.m[i][5] + delta[i][2]]
+        #d.m[i] = [d.m[i][0] - x, d.m[i][1] - y, d.m[i][2] - z, d.m[i][3] + delta[i][0], d.m[i][4] + delta[i][1], d.m[i][5] + delta[i][2]]
+        d.m[i] = [d.m[i][0], d.m[i][1], d.m[i][2], d.m[i][3] + delta[i][0], d.m[i][4] + delta[i][1], d.m[i][5] + delta[i][2]]
 
     # Generate ROS Message
     msg = cmd_vel_motors()
-    msg.vel_1 = delta[0][0]
-    msg.vel_2 = delta[1][0]
-    msg.vel_3 = delta[2][0]
-    msg.vel_4 = delta[3][0]
+    msg.vel_1 = round(delta[0][0]*f + old_delta[0]*(1-f), 3)
+    msg.vel_2 = round(-delta[1][0]*f + old_delta[1]*(1-f), 3)
+    msg.vel_3 = round(delta[2][0]*f + old_delta[2]*(1-f), 3)
+    msg.vel_4 = round(-delta[3][0]*f + old_delta[3]*(1-f), 3)
     return msg
 
 if __name__ == '__main__':
