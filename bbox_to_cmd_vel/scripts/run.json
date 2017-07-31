@@ -1,3 +1,4 @@
 {
-  "mode":"horizontal_topdown"
+  "mode":"horizontal_topdown",
+  "use_spline":1
 }

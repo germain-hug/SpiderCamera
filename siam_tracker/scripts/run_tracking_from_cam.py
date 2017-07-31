@@ -16,6 +16,7 @@ from src.parse_arguments import parse_arguments
 from src.region_to_bbox import region_to_bbox
 from src.click_and_crop import click_and_crop  # Bounding Box Selection
 from src.equirect2stereograph import equirect2stereograph
+
 import rospy
 
 def main():
@@ -89,7 +90,7 @@ def main():
             e2s.set_lat(e2s.lat - 10)
         if k==100: # d
             e2s.set_roll(e2s.roll + 10)
-        if k==97: # a 
+        if k==97: # a
             e2s.set_roll(e2s.roll - 10)
 
         # ---- Selection is done ----

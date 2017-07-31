@@ -6,6 +6,7 @@ import design as d
 from commands import update_motor_rel
 from geometry_msgs.msg import Point
 from bbox_to_cmd_vel.msg import cmd_vel_motors
+from draw_splines import BezierBuilder
 
 """
 -----------------------------------------
@@ -28,18 +29,22 @@ def callback(data, args):
     	msg = None
 
         # ---- Horizontal (planar) Motion / Topdown view ----
-    	if(args[1].mode=='horizontal_topdown'):
+    	if(args[1].mode=='horizontal_topdown' and not args[1].use_spline):
             if(abs((data.y-bbox_y)/100) > 0.3 or abs((data.x-bbox_x)/100) > 0.3):
                 msg = move_motor((data.y-bbox_y)/10, (data.x-bbox_x)/10, 0.0)
             else:
                 msg = move_motor(0.0, 0.0, 0.0)
-                
+
         # ---- Vertical Motion / Side View ----
-        elif(args[1].mode=='vertical_side'):
+        elif(args[1].mode=='vertical_side' and not args[1].use_spline):
             if(abs((data.y-bbox_y)/100) > 0.4):
                 msg = move_motor(0.0, 0.0, -(data.y-bbox_y)/10)
             else:
                 msg = move_motor(0.0, 0.0, 0.0)
+
+        # ---- Spline-based Motion Path ----
+        elif(args[1].use_spline):
+            # ------ TODO ------
 
 
         # Update Coordinates and publish
@@ -71,10 +76,30 @@ def move_motor(x,y,z,f=1.0,old_delta=(0.0,0.0,0.0,0.0)):
     return msg
 
 if __name__ == '__main__':
-    d.__init__() # Compute initial Motors Positions
 
+    # --- Initial Motors Coordinates ---
+    d.__init__()
+
+    # --- Hyperparams ---
     with open('/home/hugogermain/catkin_ws/src/bbox_to_cmd_vel/scripts/run.json') as json_file:
         run = json.load(json_file)
     run = namedtuple('design', run.keys())(**run)
 
+    # --- Retrieve User Motion Path (Optional) ---
+    if run.use_spline:
+        fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
+        line = Line2D([], [], ls='--', c='#666666',
+                    marker='x', mew=2, mec='#204a87')
+
+        ax1.add_line(line)
+        ax1.set_xlim(-1, 1)
+        ax1.set_ylim(-1, 1)
+        ax1.set_title("Bezier curve")
+
+        # Create BezierBuilder
+        bezier_builder = BezierBuilder(line)
+        plt.show()
+        spline_path = (bezier_builder.xp, bezier_builder.yp)
+
+    # --- Start ROS Node ---
     bbox_to_cmd_vel(run)
