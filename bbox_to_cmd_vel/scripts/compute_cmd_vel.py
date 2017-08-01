@@ -11,6 +11,10 @@ from draw_splines import BezierBuilder
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
+import threading
+from Queue import Queue
+import time
+
 """
 -----------------------------------------
 Takes Bounding Box coordinates as input,
@@ -27,15 +31,57 @@ y_v = []
 # Spline Current index
 idx = 0
 
+
+# ***************************
+# ---- Publishing Thread ----
+# ***************************
+
+def command_thread(q, pub):
+
+    # Initial Values
+    t_start = time.time()
+    start = False
+    curr_vel = (0.0,0.0,0.0)
+	new_vel = (0.0,0.0,0.0)
+	old_delta=(0.0, 0.0, 0.0, 0.0)
+
+    while True:
+
+        # ----- New Velocity Command has been published ----
+        cmd = q.get()
+        if cmd is not None:
+            new_vel = np.asarray(np.add(new_vel,moveBindings[key]))
+            t_start = time.time()
+            if 'msg' in locals():
+                old_delta= (msg.vel_1, msg.vel_2, msg.vel_3, msg.vel_4)
+            start = True
+
+        # ----- Linear Interpolation Factor ----
+        t_linerp = min((time.time() - t_start) / DAMP_DURATION, 1.0)
+        if(t_linerp == 1.0):
+            start = False
+            old_delta= (msg.vel_1, msg.vel_2, msg.vel_3, msg.vel_4)
+
+        elif not start:
+            t_start = time.time()
+
+        # ----- Finally, publish ----
+        if start:
+            msg = move_motor(FACTOR*new_vel[0], FACTOR*new_vel[1], FACTOR*new_vel[2], t_linerp, old_delta)
+            pub.publish(msg)
+
+
+# ***************************
+# ---- Callback Function ----
+# ***************************
+
 def callback(data, args):
     global bbox_x, bbox_y, x_v, y_v, idx
-
+    q = args[2]
     # Initialize first BB coordinates
     if bbox_x == 0 and bbox_y ==0:
         bbox_x, bbox_y = data.x, data.y
     else:
-        # Compute Displacement according to motion mode
-    	msg = None
 
         # ===================================================
         # ---- Horizontal (planar) Motion / Topdown view ----
@@ -43,9 +89,9 @@ def callback(data, args):
 
     	if(args[1].mode=='horizontal_topdown' and not args[1].use_spline):
             if(abs((data.y-bbox_y)/100) > 0.3 or abs((data.x-bbox_x)/100) > 0.3):
-                msg = move_motor((data.y-bbox_y)/10, (data.x-bbox_x)/10, 0.0)
+                q.put((data.y-bbox_y)/10, (data.x-bbox_x)/10, 0.0)
             else:
-                msg = move_motor(0.0, 0.0, 0.0)
+                q.put(0.0, 0.0, 0.0)
 
         # =====================================
         # ---- Vertical Motion / Side View ----
@@ -53,9 +99,9 @@ def callback(data, args):
 
         elif(args[1].mode=='vertical_side' and not args[1].use_spline):
             if(abs((data.y-bbox_y)/100) > 0.3):
-                msg = move_motor(0.0, 0.0, -(data.y-bbox_y)/10)
+                q.put(0.0, 0.0, -(data.y-bbox_y)/10)
             else:
-                msg = move_motor(0.0, 0.0, 0.0)
+                q.put(0.0, 0.0, 0.0)
 
         # ==================================
         # ---- Spline-based Motion Path ----
@@ -65,26 +111,25 @@ def callback(data, args):
             if(args[1].plane=='xy'):
                 if((data.y-bbox_y)/100 > 0.3): # Forward on spline
                     idx = min(idx+1, len(x_v))
-                    msg = move_motor(y_v[idx]*100, x_v[idx]*10, 0.0)
+                    q.put(y_v[idx]*100, x_v[idx]*10, 0.0)
                 elif((data.y-bbox_y)/100 < 0.3): # Backward on spline
                     idx = max(0, idx-1)
-                    msg = move_motor(y_v[idx]*100, x_v[idx]*10, 0.0)
+                    q.put(y_v[idx]*100, x_v[idx]*10, 0.0)
                 else:
-                    msg = move_motor(0.0, 0.0, 0.0)
-
-        # ===============================
-        # Update Coordinates and publish
-        # ===============================
-        if(msg is not None):
-    		args[0].publish(msg)
+                    q.put(0.0, 0.0, 0.0)
 
 
-
-# ---- Initialize ROS Node ----
-def bbox_to_cmd_vel(run):
+# --- Start Publishing Thread and ROS Node ---
+def bbox_to_cmd_vel(run, queue):
     rospy.init_node('bbox_to_cmd_vel', anonymous=True)
     pub = rospy.Publisher('cmd_vel', cmd_vel_motors, queue_size=1)
-    rospy.Subscriber('bbox', Point, callback, (pub, run))
+
+    queue = Queue(maxsize = 1)
+    thread = threading.Thread(target=command_thread, args=(queue, pub))
+    thread.daemon = True
+    thread.start()
+
+    rospy.Subscriber('bbox', Point, callback, (pub, run, queue))
     rospy.spin()
 
 # ---- Returns Relative Displacements and Updates Global Coordinates ----
@@ -136,5 +181,4 @@ if __name__ == '__main__':
         x_v = [first_order(x_s, i) for i in range(0,len(x_s)-1)]
         y_v = [first_order(y_s, i) for i in range(0,len(y_s)-1)]
 
-    # --- Start ROS Node ---
-    bbox_to_cmd_vel(run)
+    bbox_to_cmd_vel(run, queue)

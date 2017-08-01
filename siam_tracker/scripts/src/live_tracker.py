@@ -63,7 +63,7 @@ def streaming_thread(threadname, q, cap, e2s, stream_path):
 
 
 def live_tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
-            final_score_sz, templates_z, scores, cap, vid_write, 
+            final_score_sz, templates_z, scores, cap, vid_write,
             start_frame, stream_path, e2s):
 
     scale_factors = hp.scale_step ** np.linspace(-np.ceil(hp.scale_num / 2), np.ceil(hp.scale_num / 2), hp.scale_num)
@@ -114,25 +114,7 @@ def live_tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
         while (True):
 
             t_start = time.time()
-
-            # Reset to last frame to avoid cumulative lagging
-            #cap.release()
-            #cap = cv2.VideoCapture(stream_path)
-            #start_frame = cap.get(cv2.CAP_PROP_FRAME_COUNT) # Start at last frame
-            #cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
-            #ret, frame = cap.read()
-
-            #if ret:
-            #    frame = e2s.project(frame)
-            #    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Native format is BGR
-            #    num_frame += 1
-            #    start_frame += 1
-            #else:
-            #    cap.release()
-            #    cap = cv2.VideoCapture(stream_path)
-            #    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
-            #    cv2.waitKey(1)
-
+            
             frame = queue.get()
             if frame is None:
                 print("Queue is empty")
