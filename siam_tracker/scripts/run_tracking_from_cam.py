@@ -75,7 +75,7 @@ def main():
             start_frame += 1
 
         else:
-            # Reached end of file, wait for new frames
+            # --- Reached end of file, wait for new frames ---
             cap.release()
             cap = cv2.VideoCapture(stream_path)
             cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame - 10)
@@ -108,15 +108,12 @@ def main():
     target_h = int(abs(BB.refPt[1][1] - BB.refPt[0][1]))  # Template Height / 2
 
 
-
     # ===========================
     # ----- Beging Tracking -----
     # ===========================
 
-
     live_tracker(hp, run, design, pos_x, pos_y, target_w, target_h,
             final_score_sz, templates_z, scores, cap, vid_write, frame, stream_path, e2s)
-
     cap.release()
     cv2.destroyAllWindows()
 

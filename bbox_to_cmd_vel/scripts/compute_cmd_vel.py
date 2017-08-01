@@ -6,7 +6,10 @@ import design as d
 from commands import update_motor_rel
 from geometry_msgs.msg import Point
 from bbox_to_cmd_vel.msg import cmd_vel_motors
+
 from draw_splines import BezierBuilder
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 """
 -----------------------------------------
@@ -15,12 +18,18 @@ Output 4 velocity commands for the motors
 -----------------------------------------
 """
 
+# Bounding Box Coordinates
 bbox_x = 0
 bbox_y = 0
-scaling_factor = 0.1
+# Velocity Path (if Spline-based)
+x_v = []
+y_v = []
+# Spline Current index
+idx = 0
 
 def callback(data, args):
-    global bbox_x, bbox_y
+    global bbox_x, bbox_y, x_v, y_v, idx
+
     # Initialize first BB coordinates
     if bbox_x == 0 and bbox_y ==0:
         bbox_x, bbox_y = data.x, data.y
@@ -28,29 +37,48 @@ def callback(data, args):
         # Compute Displacement according to motion mode
     	msg = None
 
+        # ===================================================
         # ---- Horizontal (planar) Motion / Topdown view ----
+        # ===================================================
+
     	if(args[1].mode=='horizontal_topdown' and not args[1].use_spline):
             if(abs((data.y-bbox_y)/100) > 0.3 or abs((data.x-bbox_x)/100) > 0.3):
                 msg = move_motor((data.y-bbox_y)/10, (data.x-bbox_x)/10, 0.0)
             else:
                 msg = move_motor(0.0, 0.0, 0.0)
 
+        # =====================================
         # ---- Vertical Motion / Side View ----
+        # =====================================
+
         elif(args[1].mode=='vertical_side' and not args[1].use_spline):
-            if(abs((data.y-bbox_y)/100) > 0.4):
+            if(abs((data.y-bbox_y)/100) > 0.3):
                 msg = move_motor(0.0, 0.0, -(data.y-bbox_y)/10)
             else:
                 msg = move_motor(0.0, 0.0, 0.0)
 
+        # ==================================
         # ---- Spline-based Motion Path ----
+        # ==================================
+
         elif(args[1].use_spline):
-            # ------ TODO ------
+            if(args[1].plane=='xy'):
+                if((data.y-bbox_y)/100 > 0.3): # Forward on spline
+                    idx = min(idx+1, len(x_v))
+                    msg = move_motor(y_v[idx]*100, x_v[idx]*10, 0.0)
+                elif((data.y-bbox_y)/100 < 0.3): # Backward on spline
+                    idx = max(0, idx-1)
+                    msg = move_motor(y_v[idx]*100, x_v[idx]*10, 0.0)
+                else:
+                    msg = move_motor(0.0, 0.0, 0.0)
 
-
+        # ===============================
         # Update Coordinates and publish
-        #bbox_x, bbox_y = data.x, data.y
+        # ===============================
         if(msg is not None):
     		args[0].publish(msg)
+
+
 
 # ---- Initialize ROS Node ----
 def bbox_to_cmd_vel(run):
@@ -87,6 +115,7 @@ if __name__ == '__main__':
 
     # --- Retrieve User Motion Path (Optional) ---
     if run.use_spline:
+        global x_v, y_v
         fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
         line = Line2D([], [], ls='--', c='#666666',
                     marker='x', mew=2, mec='#204a87')
@@ -99,7 +128,13 @@ if __name__ == '__main__':
         # Create BezierBuilder
         bezier_builder = BezierBuilder(line)
         plt.show()
-        spline_path = (bezier_builder.xp, bezier_builder.yp)
+
+        x_s, y_s = bezier_builder._build_bezier()
+
+        # Compute Velocity Spline Commands
+        first_order = lambda s, i: s[i+1]-s[i]
+        x_v = [first_order(x_s, i) for i in range(0,len(x_s)-1)]
+        y_v = [first_order(y_s, i) for i in range(0,len(y_s)-1)]
 
     # --- Start ROS Node ---
     bbox_to_cmd_vel(run)

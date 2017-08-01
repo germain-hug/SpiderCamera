@@ -42,7 +42,7 @@ class equirect2stereograph:
             xGrid, yGrid = np.meshgrid(range(1,w+1),range(1,h+1))
             rads = 2*math.pi/w
             z = w / dist
-            
+
             # --- Define operators as lambda functions ---
             d = lambda x,y: x-y/2.0
             a = lambda x,y: math.atan2(d(y,h),d(x,w))
@@ -56,7 +56,7 @@ class equirect2stereograph:
             for phi_1 in range(0,360): # All latitude offsets
 
                 print(str(phi_1)+"/360...")
- 
+
                 # --- Convert to radians ---
                 phi_1 = phi_1*rads
                 s_p = math.sin(phi_1)
@@ -83,10 +83,10 @@ class equirect2stereograph:
 
     def set_lat(self, lat):
         print(lat)
-        self.lat = lat#np.mod(lat, 360)
+        self.lat = lat #np.mod(lat, 360)
 
     def set_roll(self, roll):
         self.roll = roll
 
     def project(self, im):
-        return cv2.remap(np.roll(cv2.flip(im,0), self.roll, 1), self.x_map[:,:,self.lat], self.y_map[:,:,self.lat], cv2.INTER_CUBIC)
+        return cv2.flip(cv2.remap(np.roll(im, self.roll, 1), self.x_map[:,:,self.lat], self.y_map[:,:,self.lat], cv2.INTER_CUBIC),0)

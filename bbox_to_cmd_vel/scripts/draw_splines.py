@@ -64,7 +64,7 @@ def Bernstein(n, k):
     return _bpoly
 
 
-def Bezier(points, num=200):
+def Bezier(points, num=50):
     """Build Bezier curve from points.
     """
     N = len(points)

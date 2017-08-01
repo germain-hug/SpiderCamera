@@ -52,8 +52,3 @@ if __name__ == '__main__':
     cv2.imshow('Equirectangular image', im2)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-    #for i in range(-500,500):
-    #    im2 = cv2.remap(np.roll(im,i,1), x_map, y_map, cv2.INTER_CUBIC)
-    #    cv2.imshow('Equirectangular image', im2)
-    #    cv2.waitKey(1)

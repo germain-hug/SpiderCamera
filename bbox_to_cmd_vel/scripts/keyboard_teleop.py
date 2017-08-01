@@ -53,14 +53,6 @@ def getKey():
 		return sys.stdin.read(1)
 	return False
 
-	"""
-	tty.setraw(sys.stdin.fileno())
-	select.select([sys.stdin], [], [], 0)
-	key = sys.stdin.read(1)
-	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
-	return key
-	"""
-
 if __name__=="__main__":
 
 	settings = termios.tcgetattr(sys.stdin)
@@ -72,7 +64,6 @@ if __name__=="__main__":
 	curr_vel = (0.0,0.0,0.0)
 	new_vel = (0.0,0.0,0.0)
 	old_delta=(0.0, 0.0, 0.0, 0.0)
-
 	d.__init__()
 
 	try:
@@ -85,7 +76,7 @@ if __name__=="__main__":
 		while(1):
 			key = getKey()
 
-			# ---- A new command has been emitted ---
+			# A new command has been emitted
 			if key in moveBindings.keys():
 				new_vel = np.asarray(np.add(new_vel,moveBindings[key]))
 				t_start = time.time()
@@ -93,7 +84,7 @@ if __name__=="__main__":
 					old_delta= (msg.vel_1, msg.vel_2, msg.vel_3, msg.vel_4)
 				start = True
 
-			# ---- A 'stop' command has been emitted ---
+			# A 'stop' command has been emitted
 			elif(key==' '):
 				t_start = time.time()
 				new_vel = (0.0, 0.0, 0.0)
@@ -102,7 +93,7 @@ if __name__=="__main__":
 			elif(key=='q'):
 				break
 
-			# ----- linerp factor ----
+			# Linear Interpolation Factor
 			t_linerp = min((time.time() - t_start) / DAMP_DURATION, 1.0)
 			if(t_linerp == 1.0):
 				start = False
@@ -112,7 +103,7 @@ if __name__=="__main__":
 				t_start = time.time()
 
 
-			# ---- Speed interpolation ---
+			# Velocity Command
 			if start:
 				msg = move_motor(FACTOR*new_vel[0], FACTOR*new_vel[1], FACTOR*new_vel[2], t_linerp, old_delta)
 				pub.publish(msg)
