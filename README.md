@@ -1,7 +1,7 @@
 # Spider-Camera  
-MSc Computer Graphics, Vision and Imaging Thesis  
-University College London  
-Supervised by Pr. Gabriel J. Brostow  
+_MSc Computer Graphics, Vision and Imaging Thesis_  
+_University College London_  
+_Supervised by Pr. Gabriel J. Brostow_  
 
 ## Abstract  
 SpiderCams have proved to enable elaborate aerial videography and are now widely used in sporting events coverage. Typically deployed over stadiums, they can go in any direction and deliver omni-directional viewpoints. In comparison to a movie crane, the SpiderCam can be easily mounted at a higher altitude, and cover a much broader range. When filming, SpiderCam operators can use it to track distant targets and create cinematic-looking shots.  
