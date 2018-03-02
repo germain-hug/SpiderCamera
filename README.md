@@ -10,6 +10,6 @@ However, performing sophisticated shots with a SpiderCam is hard because both th
 
 <p align="center"><img width="500" src ="https://raw.githubusercontent.com/germain-hug/SpiderCamera/master/imgs/overview.png" /></p>   
 
-We developed a prototype that lets the SpiderCam travel along custom paths, while keeping the target in frame, with little to no supervision. More specifically, we let the user select a trajectory support, and the software delivers real-time motor commands to regulate the target position in frame.  
+We developed a prototype that lets the SpiderCam travel along custom paths, while keeping the target in frame, with little to no supervision. More specifically, we let the user select a trajectory support, and the software delivers real-time motor commands to regulate the target position in frame. [...]  
 
 ### Read more [here](https://www.hugogermain.com/360-autonomous-spidercam)
