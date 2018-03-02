@@ -1,0 +1,7 @@
+{
+	"n_subseq": 3,
+	"dist_threshold": 20,
+	"stop_on_failure": 0,
+	"dataset": "validation",
+	"start_frame": 0
+}

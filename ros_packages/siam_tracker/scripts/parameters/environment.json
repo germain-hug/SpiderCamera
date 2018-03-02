@@ -1,0 +1,6 @@
+{
+	"root_dataset": "data",
+	"root_pretrained": "/home/hugogermain/catkin_ws/src/siam_tracker/scripts/pretrained",
+	"root_parameters": "parameters",
+	"root_sequences": "/home/hugogermain/catkin_ws/src/siam_tracker/scripts/sequences"
+}

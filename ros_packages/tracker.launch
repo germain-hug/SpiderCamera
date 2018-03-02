@@ -1,0 +1,4 @@
+<launch>
+  <node name="bbox_2_vel" pkg="bbox_to_cmd_vel" type="compute_cmd_vel.py" />
+  <node name="siam_tracker" pkg="siam_tracker" type="run_tracking_from_cam.py" />
+</launch>
